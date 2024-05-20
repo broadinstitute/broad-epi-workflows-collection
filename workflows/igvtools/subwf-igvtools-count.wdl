@@ -8,11 +8,20 @@ workflow wf_igvtools{
             author: 'Eugenio Mattei (emattei@broadinstitute.org) @ Broad Institute of MIT and Harvard'
             description: 'Broad Institute of MIT and Harvard: Deeptools.'
     }
-
-    call task_igvtools.igvtools_count as count
+    
+    input {
+        Array[File] input_bams
+    }
+    
+    scatter(file in input_bams){
+        call task_igvtools.igvtools_count as count{
+            input:
+                sorted_bam = file
+        }    
+    }
 
     output {
-        File igvtools_count_bw = count.igvtools_count_bw
-        File igvtools_count_tdf = count.igvtools_count_tdf
+        Array[File] igvtools_count_bw = count.igvtools_count_bw
+        Array[File] igvtools_count_tdf = count.igvtools_count_tdf
     }
 }
