@@ -22,6 +22,7 @@ task igvtools_count {
         Int? extend_factor = 150
         Int? minimum_mapping_quality = 0
         String? prefix
+        String? genome_id = "hg38"
 
         # Compute Resources
         Int? cpus = 1
@@ -48,7 +49,7 @@ task igvtools_count {
         ~{"--minMapQuality " + minimum_mapping_quality} \
         ~{sorted_bam} \
         ~{prefix}_igvtools.wig \
-        ~{chrom_sizes}
+        ~{genome_id}
 
         wigToBigWig ~{prefix}_igvtools.wig ~{chrom_sizes} ~{prefix}_igvtools.bw
 
@@ -61,7 +62,7 @@ task igvtools_count {
         ~{"--minMapQuality " + minimum_mapping_quality} \
         ~{sorted_bam} \
         ~{prefix}_igvtools.tdf \
-        ~{chrom_sizes}
+        ~{genome_id}
 
 
     >>>
