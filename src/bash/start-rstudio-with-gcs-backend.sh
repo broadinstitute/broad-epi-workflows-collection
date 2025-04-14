@@ -13,13 +13,13 @@
 set -euo pipefail
 
 # === CONFIGURE THESE ===
-PROJECT_ID="sw-broad-epigenomics-igvf"
-ZONE="us-east1-b"
-VM_NAME="rstudio-tmp-vm"
-MACHINE_TYPE="n2-standard-4"
-DISK_SIZE="50GB"
+PROJECT_ID="sw-broad-epigenomics-igvf" #name of google project (this is the project with linked billing account)
+ZONE="us-east1-b" #name of zone you want to create VM in. you can find zones here https://cloud.google.com/compute/docs/regions-zones. Closer zones should be cheaper. 
+VM_NAME="rstudio-tmp-vm" #name of the VM the script will create. 
+MACHINE_TYPE="n2-standard-4" #name of the machine type. Google has preconfigured VMs here https://cloud.google.com/compute/docs/general-purpose-machines#n4-standard. This decides the cores and memory of the VM
+DISK_SIZE="50GB" #disk space to request on VM
 IMAGE="rocker/rstudio:4.2.2"  # Or you can create custom docker and pass tag here like swekhande/sw-dockers:bp-cells
-DOCKER_MEM='16g'
+DOCKER_MEM='16g' #how much RAM you want to give the Rstudio. 
 RSTUDIO_PASSWORD="password"
 NETWORK="sw-broad-network" #find by running gcloud compute networks list
 BUCKET_NAME=""  # Pass bucket name (optional). Pass "" if not needed. bucket name should not have gs://
