@@ -4,7 +4,7 @@
 
 #Configure the parameters below before running. 
 
-#If a BUCKET_NAME is provided, the script will mount it in the VM so you can access the data in RStudio
+#If a BUCKET_NAME is provided, the script will mount the bucket via gcsfuse in the VM so you can access the data in RStudio
 
 #This assumes you have gcloud cli installed on the machine you are running this script, and you are authenticated (via gcloud auth login). 
 
@@ -13,16 +13,38 @@
 set -euo pipefail
 
 # === CONFIGURE THESE ===
-PROJECT_ID="sw-broad-epigenomics-igvf" #name of google project (this is the project with linked billing account)
-ZONE="us-east1-b" #name of zone you want to create VM in. you can find zones here https://cloud.google.com/compute/docs/regions-zones. Closer zones should be cheaper. 
-VM_NAME="rstudio-tmp-vm" #name of the VM the script will create. 
-MACHINE_TYPE="n2-standard-4" #name of the machine type. Google has preconfigured VMs here https://cloud.google.com/compute/docs/general-purpose-machines#n4-standard. This decides the cores and memory of the VM
-DISK_SIZE="50GB" #disk space to request on VM
-IMAGE="rocker/rstudio:4.2.2"  # Or you can create custom docker and pass tag here like swekhande/sw-dockers:bp-cells
-DOCKER_MEM='16g' #how much RAM you want to give the Rstudio. 
+#name of google project (this is the project with linked billing account)
+PROJECT_ID="sw-broad-epigenomics-igvf"
+
+#name of zone you want to create VM in. you can find zones here https://cloud.google.com/compute/docs/regions-zones. Closer zones should be cheaper. 
+ZONE="us-east1-b"
+
+#name of the VM the script will create. 
+VM_NAME="rstudio-tmp-vm"
+
+#name of the machine type. Google has preconfigured VMs here https://cloud.google.com/compute/docs/general-purpose-machines#n4-standard. This decides the cores and memory of the VM
+MACHINE_TYPE="e2-standard-4"
+
+#disk space to request on VM
+DISK_SIZE="50GB"
+
+# Or you can create custom docker and pass tag here like swekhande/sw-dockers:bp-cells
+IMAGE="rocker/rstudio:4.2.2"
+
+#how much RAM you want to give the Rstudio.
+DOCKER_MEM='16g' 
+
 RSTUDIO_PASSWORD="password"
-NETWORK="sw-broad-network" #find by running gcloud compute networks list
-BUCKET_NAME=""  # Pass bucket name (optional). Pass "" if not needed. bucket name should not have gs://
+
+#find by running gcloud compute networks list
+NETWORK="sw-broad-network"
+
+# Pass bucket name (optional). This will be mounted at /mnt/data. Pass "" if not needed. bucket name should not have gs://
+BUCKET_NAME="sw-igvf-submission"
+
+# Pass folder name (optional). Your Rstudio docker will have read/write permissions to this folder only. If you try to give 
+#read/write permissions to the whole bucket, it will take a really long time. Pass "" if not needed. folder name should not have gs://
+FOLDER_NAME="seqspecs"
 
 echo "Creating VM: $VM_NAME in $ZONE (network: $NETWORK)"
 
@@ -55,19 +77,22 @@ if [[ -n "$BUCKET_NAME" ]]; then
 
     gcloud compute ssh $VM_NAME --zone=$ZONE --project=$PROJECT_ID --command="sudo apt-get install -y gcsfuse"
 
-    gcloud compute ssh $VM_NAME --zone=$ZONE --project=$PROJECT_ID --command="sudo mkdir -p /mnt/data"  
+    gcloud compute ssh $VM_NAME --zone=$ZONE --project=$PROJECT_ID --command="mkdir -p ~/data"  
 
-    gcloud compute ssh $VM_NAME --zone=$ZONE --project=$PROJECT_ID --command="sudo gcloud auth application-default login"
+    gcloud compute ssh $VM_NAME --zone=$ZONE --project=$PROJECT_ID --command="sudo gcloud auth application-default login --no-launch-browser"
 
-    gcloud compute ssh $VM_NAME --zone=$ZONE --project=$PROJECT_ID --command="sudo gcsfuse --implicit-dirs $BUCKET_NAME /mnt/data"
+    gcloud compute ssh $VM_NAME --zone=$ZONE --project=$PROJECT_ID --command="sudo chmod 777 -R ~/data"
+
+    gcloud compute ssh $VM_NAME --zone=$ZONE --project=$PROJECT_ID --command="sudo sed -i '/^# *user_allow_other/s/^# *//' /etc/fuse.conf || echo 'user_allow_other' | sudo tee -a /etc/fuse.conf"
+
+    gcloud compute ssh $VM_NAME --zone=$ZONE --project=$PROJECT_ID --command="gcsfuse --implicit-dirs -o allow_other --only-dir $FOLDER_NAME $BUCKET_NAME ~/data"
     
 else
   echo "No bucket specified — skipping gcsfuse mount"
 fi
 
 gcloud compute ssh $VM_NAME --zone=$ZONE --project=$PROJECT_ID --command="sudo docker pull $IMAGE"
-
-gcloud compute ssh $VM_NAME --zone=$ZONE --project=$PROJECT_ID --command="sudo docker run -d -e PASSWORD=$RSTUDIO_PASSWORD -p 443:8787 --memory=$DOCKER_MEM --name rstudio $IMAGE"
+gcloud compute ssh $VM_NAME --zone=$ZONE --project=$PROJECT_ID --command="sudo docker run -d --mount type=bind,source=\$(pwd)/data,target=/home/rstudio/data --privileged -e PASSWORD=$RSTUDIO_PASSWORD -p 443:8787 --memory=$DOCKER_MEM --name rstudio $IMAGE"
 
 EXTERNAL_IP=$(gcloud compute instances describe $VM_NAME --zone=$ZONE --project=$PROJECT_ID --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
 
