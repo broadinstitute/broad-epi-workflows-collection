@@ -23,6 +23,7 @@ task igvtools_count {
         Int? minimum_mapping_quality = 0
         String? prefix
         String? genome_id = "hg38"
+        File? genome_fasta 
 
         # Compute Resources
         Int? cpus = 1
@@ -35,6 +36,8 @@ task igvtools_count {
     Int mem_gb = memory_gb
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
     Int disk_gb = 100
+
+    String genomefile = select_first([genome_fasta, genome_id])
 
 
     command <<<
@@ -49,7 +52,7 @@ task igvtools_count {
         ~{"--minMapQuality " + minimum_mapping_quality} \
         ~{sorted_bam} \
         ~{prefix}_igvtools.wig \
-        ~{genome_id}
+        ~{genomefile}
 
         wigToBigWig ~{prefix}_igvtools.wig ~{chrom_sizes} ~{prefix}_igvtools.bw
 
@@ -62,7 +65,7 @@ task igvtools_count {
         ~{"--minMapQuality " + minimum_mapping_quality} \
         ~{sorted_bam} \
         ~{prefix}_igvtools.tdf \
-        ~{genome_id}
+        ~{genomefile}
 
 
     >>>
