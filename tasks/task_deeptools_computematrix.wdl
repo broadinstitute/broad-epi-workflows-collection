@@ -23,10 +23,11 @@ task deeptools_computeMatrix {
         String? end_label
 
         String mode = "reference-point" # reference-point or scale-regions
-        Int beforeRegionStartLength = 3000
-        Int afterRegionStartLength = 3000
+        Int beforeRegionStartLength = 500
+        Int afterRegionStartLength = 500
         Int? regionBodyLength
         Boolean skipZeros = true
+        Boolean? missingDataAsZero = true
         String sortRegions = "keep"
 
     }
@@ -42,15 +43,16 @@ task deeptools_computeMatrix {
 
         computeMatrix ${mode} -S ${sep=" " bigwigs} \
             -R ${sep=" " regions_bed} \
-            --beforeRegionStartLength ${beforeRegionStartLength} \
-            --afterRegionStartLength ${afterRegionStartLength} \
-            -p 16 \
-            ${true='--skipZeros ' false='' skipZeros} \
+            ${"--beforeRegionStartLength " + beforeRegionStartLength} \
+            ${"--afterRegionStartLength " + afterRegionStartLength} \
             ${"--regionBodyLength " + regionBodyLength} \
             ${"--sortRegions " + sortRegions} \
             ${"--startLabel " + start_label} \
             ${"--endLabel " + end_label} \
             ${"-bs " + bin_size} \
+            ${true='--skipZeros ' false='' skipZeros} \
+            ${true='--missingDataAsZero ' false='' missingDataAsZero} \
+            -p 16 \
             -o ${prefix}.mat.gz
     }
 
