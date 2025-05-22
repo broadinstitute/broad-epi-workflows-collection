@@ -25,6 +25,7 @@ task deeptools_computeMatrix {
         String mode = "reference-point" # reference-point or scale-regions
         Int beforeRegionStartLength = 500
         Int afterRegionStartLength = 500
+        Int? maxThreshold
         Int? regionBodyLength
         Boolean skipZeros = true
         Boolean? missingDataAsZero = true
@@ -49,6 +50,7 @@ task deeptools_computeMatrix {
             ${"--sortRegions " + sortRegions} \
             ${"--startLabel " + start_label} \
             ${"--endLabel " + end_label} \
+            ${"--maxThreshold " + maxThreshold} \
             ${"-bs " + bin_size} \
             ${true='--skipZeros ' false='' skipZeros} \
             ${true='--missingDataAsZero ' false='' missingDataAsZero} \
