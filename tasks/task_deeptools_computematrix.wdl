@@ -17,7 +17,7 @@ task deeptools_computeMatrix {
         Int bin_size = 50
         Array[File] bigwigs
         Array[File] regions_bed
-        String docker_image = "njaved/deeptools"
+        String docker_image = "polumechanos/epi-deeptools:main"
         String? prefix
         String? start_label
         String? end_label
