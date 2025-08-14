@@ -41,5 +41,5 @@ ggplot2::ggsave(filename = paste0(prefix, ".pbs_plot.png"),
        plot = pbsR::getPBSPlot(t4, title_str = prefix))
 
 ggplot2::ggsave(filename = paste0(prefix, ".pbs_distribution_plot.png"),
-                plot = ggplot(data = t4$pbs_obj$bin_df) + geom_histogram(aes(x = pbs)) + xlab(paste0(prefix + ": PBS scores"))
+                plot = ggplot(data = t4$pbs_obj$bin_df) + geom_histogram(aes(x = pbs)) + ggplot2::xlab(paste0(prefix, ": PBS scores"))
                 )
