@@ -18,7 +18,7 @@ task bam_to_binnedcounts {
   command <<<
     set -e
     
-    igvtools count -w ~{binsize} --minMapQuality 1 --paired ~{bam} ~{prefix}.wig ~{igv_genome_file}
+    igvtools count -w ~{binsize} --minMapQuality 1 --pairs ~{bam} ~{prefix}.wig ~{igv_genome_file}
     wigToBigWig ~{prefix}.wig ~{chrom_sizes} ~{prefix}.bw
     bigWigAverageOverBed ~{prefix}.bw ~{reference_tiled_bed} stdout | cut -f 5 > counts.txt
     cut -f 1-3 ~{reference_tiled_bed} - | paste - counts.txt > ~{prefix}.binned.bed
