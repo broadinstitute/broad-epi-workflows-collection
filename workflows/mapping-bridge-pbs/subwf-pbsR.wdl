@@ -2,7 +2,7 @@ version 1.0
 
 import "../../tasks/task_check_inputs.wdl" as task_check_inputs
 import "../../tasks/task_bam_to_binnedcounts.wdl" as task_bam_to_binnedcounts
-import "../../tasks/task_pbsR.wdl" as task_pbsr
+import "../../tasks/task_pbsr.wdl" as task_pbsr
 
 workflow wf_pbsR{
     meta {
