@@ -13,8 +13,8 @@ task pbsr {
   }
 
   command <<<
-    set -e
-    Rscript $(which pbsR_script.R) ~{binned_bed} ~{mappability_bed} ~{prefix}
+    set -euo pipefail
+    Rscript "~{pbsR_script}" "~{binned_bed}" "~{mappability_bed}" "~{prefix}"
   >>>
 
   output {
