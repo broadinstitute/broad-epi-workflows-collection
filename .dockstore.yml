@@ -117,3 +117,12 @@ workflows:
              - main
          tags:
              - /.*/
+
+   - name: "pbsR"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/mapping-bridge-pbs/subwf-pbsR.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - sw-branch
+         tags:
+             - /.*/
