@@ -14,7 +14,7 @@ task pbsr {
 
   command <<<
     set -euo pipefail
-    Rscript "~{pbsR_script}" "~{binned_bed}" "~{mappability_bed}" "~{prefix}"
+    Rscript /usr/local/bin/pbsR_script.R ~{binned_bed} ~{mappability_bed} ~{prefix}
   >>>
 
   output {
