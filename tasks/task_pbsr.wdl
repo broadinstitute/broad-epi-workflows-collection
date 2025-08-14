@@ -14,7 +14,7 @@ task pbsr {
 
   command <<<
     set -e
-    Rscript pbsR_script.R ~{binned_bed} ~{mappability_bed} ~{prefix}
+    Rscript $(which pbsR_script.R) ~{binned_bed} ~{mappability_bed} ~{prefix}
   >>>
 
   output {

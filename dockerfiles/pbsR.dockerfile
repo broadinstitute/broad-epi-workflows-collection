@@ -14,4 +14,4 @@ RUN Rscript -e "install.packages(c('patchwork', 'goftest', 'fBasics', 'ggplot2',
 #RUN cd pbs-analysis && Rscript -e "pkgload::load_all('pbsR')"
 RUN Rscript -e "install.packages(c('plyr'))"
 
-ADD ../src/R/pbsR_script.R ./
+COPY pbsR_script.R /usr/local/bin
