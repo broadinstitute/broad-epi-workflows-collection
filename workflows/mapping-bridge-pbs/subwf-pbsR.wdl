@@ -1,7 +1,7 @@
 version 1.0
 
 import "../../tasks/task_check_inputs.wdl" as task_check_inputs
-import "../../tasks/task_bam_to_binnedcounts.wdl" as task_bam_to_binnedcounts
+import "../../tasks/task_fragment_to_binnedcounts.wdl" as task_fragment_to_binnedcounts
 import "../../tasks/task_pbsr.wdl" as task_pbsr
 
 workflow wf_pbsR{
@@ -27,9 +27,9 @@ workflow wf_pbsR{
                 igvf_credentials = igvf_credentials
         }
 
-    call task_bam_to_binnedcounts.bam_to_binnedcounts as bam_to_binnedcounts {
+    call task_fragment_to_binnedcounts.fragment_to_binnedcounts as fragment_to_binnedcounts {
             input:
-                bam = check_inputs.output_file,
+                fragments = check_inputs.output_file,
                 reference_tiled_bed = reference_tiled_bed,
                 igv_genome_file = igv_genome_file,
                 chrom_sizes = chrom_sizes,
@@ -38,7 +38,7 @@ workflow wf_pbsR{
 
     call task_pbsr.pbsr as pbsr {
         input:
-            binned_bed = bam_to_binnedcounts.binned_bed,
+            binned_bed = fragment_to_binnedcounts.binned_bed,
             mappability_bed = mappability_bed,
             prefix = prefix
     }
@@ -50,6 +50,6 @@ workflow wf_pbsR{
         Float k = pbsr.k
         Float beta = pbsr.beta
         Float lambda = pbsr.lambda
-        File bigwig = bam_to_binnedcounts.bigwig
+        File bigwig = fragment_to_binnedcounts.bigwig
     }
 }

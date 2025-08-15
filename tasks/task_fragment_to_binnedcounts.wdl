@@ -1,8 +1,8 @@
 version 1.0
 
-task bam_to_binnedcounts {
+task fragment_to_binnedcounts {
   input {
-    File bam
+    File fragments
     File reference_tiled_bed # bed file of the binned genome without blacklist regions, 4th column = numbered index
     File igv_genome_file
     File chrom_sizes
@@ -10,16 +10,19 @@ task bam_to_binnedcounts {
     Int binsize = 5000
 
     # runtime values
-    String docker = "quay.io/kdong2395/pbs:kdong-dev"
+    String docker = "swekhande/sw-dockers:fragment_binning"
     Int disk_gb = 50
     Int machine_mem_gb = 4
   }
 
   command <<<
-    set -e
-    
-    igvtools count -w ~{binsize} --minMapQuality 1 --pairs ~{bam} ~{prefix}.wig ~{igv_genome_file}
-    wigToBigWig ~{prefix}.wig ~{chrom_sizes} ~{prefix}.bw
+    set -euo pipefail
+
+    gunzip -c ~{fragments} > ~{prefix}.fragment.bed
+    bedtools genomecov -i ~{prefix}.fragment.bed -g ~{chrom_sizes} -bg > ~{prefix}.bedgraph
+    LC_COLLATE=C sort -k1,1 -k2,2n ~{prefix}.bedgraph > ~{prefix}.sorted.bedgraph  
+    rm ~{prefix}.bedgraph
+    bedGraphToBigWig ~{prefix}.sorted.bedgraph ~{chrom_sizes} ~{prefix}.bw
     bigWigAverageOverBed ~{prefix}.bw ~{reference_tiled_bed} stdout | cut -f 5 > counts.txt
     cut -f 1-3 ~{reference_tiled_bed} - | paste - counts.txt > ~{prefix}.binned.bed
   >>>
