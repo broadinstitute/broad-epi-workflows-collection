@@ -22,11 +22,11 @@ task rna_align {
         String docker_image = "us.gcr.io/buenrostro-share-seq/share_task_star"
         Int cpus = 16
         Int disk_gb = 100
+        Int mem_gb = 128
     }
     #Float input_file_size_gb = size(input[0], "G")
     Int samtools_cpus = 6
     Int samtools_mem_gb = 8
-    Int mem_gb = 64
     #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
 
     # Define the output names
