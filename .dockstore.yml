@@ -41,7 +41,7 @@ workflows:
      primaryDescriptorPath: /workflows/featurecount/subwf-featurecount.wdl
      filters:  # Only develop or master branches and localAligner/** tags
          branches:
-             - main
+             - dev
          tags:
              - /.*/
              
