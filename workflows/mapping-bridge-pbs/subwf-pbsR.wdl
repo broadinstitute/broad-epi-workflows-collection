@@ -26,10 +26,12 @@ workflow wf_pbsR{
                 path = accession,
                 igvf_credentials = igvf_credentials
         }
+    
+    File fragment = select_first([ check_inputs.output_file, accession ])
 
     call task_fragment_to_binnedcounts.fragment_to_binnedcounts as fragment_to_binnedcounts {
             input:
-                fragments = check_inputs.output_file,
+                fragments = fragment,
                 reference_tiled_bed = reference_tiled_bed,
                 igv_genome_file = igv_genome_file,
                 chrom_sizes = chrom_sizes,
