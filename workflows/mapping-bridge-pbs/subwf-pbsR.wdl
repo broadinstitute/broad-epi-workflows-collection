@@ -12,7 +12,7 @@ workflow wf_pbsR{
     }
     
     input {
-        String accession
+        File accession
         File igvf_credentials
         File reference_tiled_bed
         File igv_genome_file
@@ -21,11 +21,13 @@ workflow wf_pbsR{
         String prefix
     }
     
-    call task_check_inputs.check_inputs as check_inputs {
-            input:
-                path = accession,
-                igvf_credentials = igvf_credentials
-        }
+    if (sub(accession, "^gs:\/\/", "") == sub(accession, "", "")){
+        call task_check_inputs.check_inputs as check_inputs {
+                input:
+                    path = accession,
+                    igvf_credentials = igvf_credentials
+            }
+    }
     
     File fragment = select_first([ check_inputs.output_file, accession ])
 
