@@ -54,6 +54,6 @@ workflow wf_pbsR{
         Float k = pbsr.k
         Float beta = pbsr.beta
         Float lambda = pbsr.lambda
-        File bigwig = fragment_to_binnedcounts.bigwig
+        #File bigwig = fragment_to_binnedcounts.bigwig
     }
 }

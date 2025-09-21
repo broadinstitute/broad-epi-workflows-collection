@@ -27,26 +27,24 @@ task fragment_to_binnedcounts {
     #cut -f 1-3 ~{reference_tiled_bed} - | paste - counts.txt > ~{prefix}.binned.bed
 
     gunzip -c ~{fragments} > ~{prefix}.fragment.bed
-    
-    # add Tn5 insertion sites, two per fragment
+
     awk 'BEGIN{OFS="\t"} {print $1, $2+4, $2+5; print $1, $3-5, $3-4}' \
-    ~{prefix}.fragment.bed > ~{prefix}.tn5.bed
-    
+        ~{prefix}.fragment.bed > ~{prefix}.tn5.bed
+
     LC_COLLATE=C sort -k1,1 -k2,2n ~{prefix}.tn5.bed > ~{prefix}.tn5.sorted.bed
+    LC_COLLATE=C sort -k1,1 -k2,2n ~{reference_tiled_bed} > reference.bed
 
-    # 4. Create genome-wide insertion track (bigWig)
-    bedtools genomecov -i ~{prefix}.tn5.sorted.bed -g ~{chrom_sizes} -bg > ~{prefix}.tn5.bedgraph
-    bedGraphToBigWig ~{prefix}.tn5.bedgraph ~{chrom_sizes} ~{prefix}.tn5.bw
-    rm ~{prefix}.tn5.bedgraph
+    bedtools intersect -c -a reference.bed -b ~{prefix}.tn5.sorted.bed > ~{prefix}.binned.raw.bed
+    cut -f1,2,3,5 ~{prefix}.binned.raw.bed > ~{prefix}.binned.raw.counts.bed
 
-    bigWigAverageOverBed ~{prefix}.tn5.bw ~{reference_tiled_bed} stdout | cut -f 5 > counts.txt
-    cut -f 1-3 ~{reference_tiled_bed} - | paste - counts.txt > ~{prefix}.binned.bed
+    awk 'BEGIN{OFS="\t"} {bin=$3-$2; norm=$4/bin; print $1,$2,$3,norm}' \
+        ~{prefix}.binned.raw.counts.bed > ~{prefix}.binned.norm.bed
 
   >>>
 
   output {
-    File binned_bed = "~{prefix}.binned.bed"
-    File bigwig     = "~{prefix}.bw"
+    File binned_bed = "~{prefix}.binned.norm.bed"
+    #File bigwig     = "~{prefix}.bw"
   }
 
   runtime {
