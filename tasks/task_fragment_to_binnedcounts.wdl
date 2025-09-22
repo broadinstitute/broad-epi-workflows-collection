@@ -37,7 +37,7 @@ task fragment_to_binnedcounts {
     LC_COLLATE=C sort -k1,1 -k2,2n ~{reference_tiled_bed} > reference.bed
     wc -l reference.bed
 
-    bedtools intersect -c -a reference.bed -b ~{prefix}.tn5.sorted.bed > ~{prefix}.binned.raw.bed
+    bedtools intersect -c -sorted -a reference.bed -b ~{prefix}.tn5.sorted.bed > ~{prefix}.binned.raw.bed
     cut -f1,2,3,5 ~{prefix}.binned.raw.bed > ~{prefix}.binned.raw.counts.bed
 
     head ~{prefix}.binned.raw.counts.bed
