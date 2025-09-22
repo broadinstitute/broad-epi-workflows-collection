@@ -33,7 +33,7 @@ task fragment_to_binnedcounts {
         ~{prefix}.fragment.bed > ~{prefix}.tn5.bed
     wc -l ~{prefix}.tn5.bed
 
-    LC_COLLATE=C sort -k1,1 -k2,2n ~{prefix}.tn5.bed > ~{prefix}.tn5.sorted.bed
+    LC_COLLATE=C sort -k1,1 -k2,2n -S 2G -T . ~{prefix}.tn5.bed > ~{prefix}.tn5.sorted.bed
     LC_COLLATE=C sort -k1,1 -k2,2n ~{reference_tiled_bed} > reference.bed
     wc -l reference.bed
 
