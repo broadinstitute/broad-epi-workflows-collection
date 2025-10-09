@@ -8,7 +8,7 @@ task check_inputs {
     meta {
         version: 'v0.1'
         author: 'Siddarth Wekhande (swekhand@broadinstitute.org) at Broad Institute of MIT and Harvard'
-        description: 'Broad Institute of MIT and Harvard IGVF pipeline: check inputs task'
+        description: 'Broad Institute of MIT and Harvard: Download IGVF accession'
     }
 
     input {

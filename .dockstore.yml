@@ -126,3 +126,12 @@ workflows:
              - sw-branch
          tags:
              - /.*/
+
+   - name: "download_IGVF_accession"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/download-igvf-accession/subwf-check-inputs.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - sw-branch
+         tags:
+             - /.*/
