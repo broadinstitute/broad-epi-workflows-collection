@@ -18,14 +18,17 @@ task fragment_to_binnedcounts {
   command <<<
     set -euo pipefail
 
-    #gunzip -c ~{fragments} > ~{prefix}.fragment.bed
-    #bedtools genomecov -i ~{prefix}.fragment.bed -g ~{chrom_sizes} -bg > ~{prefix}.bedgraph
-    #LC_COLLATE=C sort -k1,1 -k2,2n ~{prefix}.bedgraph > ~{prefix}.sorted.bedgraph  
-    #rm ~{prefix}.bedgraph
-    #bedGraphToBigWig ~{prefix}.sorted.bedgraph ~{chrom_sizes} ~{prefix}.bw
-    #bigWigAverageOverBed ~{prefix}.bw ~{reference_tiled_bed} stdout | cut -f 5 > counts.txt
-    #cut -f 1-3 ~{reference_tiled_bed} - | paste - counts.txt > ~{prefix}.binned.bed
+    gunzip -c ~{fragments} > ~{prefix}.fragment.bed
+    bedtools genomecov -i ~{prefix}.fragment.bed -g ~{chrom_sizes} -bg > ~{prefix}.bedgraph
+    LC_COLLATE=C sort -k1,1 -k2,2n ~{prefix}.bedgraph > ~{prefix}.sorted.bedgraph  
+    rm ~{prefix}.bedgraph
+    bedGraphToBigWig ~{prefix}.sorted.bedgraph ~{chrom_sizes} ~{prefix}.bw
+    LC_COLLATE=C sort -k1,1 -k2,2n ~{reference_tiled_bed} > reference.bed
+    wc -l reference.bed
+    bigWigAverageOverBed ~{prefix}.bw reference.bed stdout | cut -f 5 > counts.txt
+    cut -f 1-3 reference.bed - | paste - counts.txt > ~{prefix}.binned.bed
 
+    """
     gunzip -c ~{fragments} > ~{prefix}.fragment.bed
     wc -l ~{prefix}.fragment.bed
 
@@ -34,6 +37,7 @@ task fragment_to_binnedcounts {
     wc -l ~{prefix}.tn5.bed
 
     LC_COLLATE=C sort -k1,1 -k2,2n -S 2G -T . ~{prefix}.tn5.bed > ~{prefix}.tn5.sorted.bed
+    
     LC_COLLATE=C sort -k1,1 -k2,2n ~{reference_tiled_bed} > reference.bed
     wc -l reference.bed
 
@@ -45,11 +49,14 @@ task fragment_to_binnedcounts {
 
     awk 'BEGIN{OFS="\t"} {bin=$3-$2; norm=$4/bin; print $1,$2,$3,norm}' \
         ~{prefix}.binned.raw.counts.bed > ~{prefix}.binned.norm.bed
+    
+    mv ~{prefix}.binned.norm.bed ~{prefix}.binned.bed
+    """
 
   >>>
 
   output {
-    File binned_bed = "~{prefix}.binned.norm.bed"
+    File binned_bed = "~{prefix}.binned.bed"
     #File bigwig     = "~{prefix}.bw"
   }
 
