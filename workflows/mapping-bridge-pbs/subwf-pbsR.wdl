@@ -15,7 +15,6 @@ workflow wf_pbsR{
         File accession
         File igvf_credentials
         File reference_tiled_bed
-        File igv_genome_file
         File chrom_sizes
         File mappability_bed
         String prefix
@@ -35,7 +34,6 @@ workflow wf_pbsR{
             input:
                 fragments = fragment,
                 reference_tiled_bed = reference_tiled_bed,
-                igv_genome_file = igv_genome_file,
                 chrom_sizes = chrom_sizes,
                 prefix = prefix
         }
