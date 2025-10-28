@@ -36,9 +36,8 @@ task fragment_to_binnedcounts {
       bedtools genomecov -i "~{prefix}.fragment.bed" -g "~{chrom_sizes}" -bg > "~{prefix}.bedgraph"
       LC_COLLATE=C sort -k1,1 -k2,2n "~{prefix}.bedgraph" > "~{prefix}.sorted.bedgraph"
       bedGraphToBigWig "~{prefix}.sorted.bedgraph" "~{chrom_sizes}" "~{prefix}.bw"
-      LC_COLLATE=C sort -k1,1 -k2,2n "~{reference_tiled_bed}" > reference.sorted.bed
-      bigWigAverageOverBed "~{prefix}.bw" reference.sorted.bed stdout | cut -f5 > counts.txt
-      paste <(cut -f1-3 reference.sorted.bed) counts.txt > "~{prefix}.binned.bed"
+      bigWigAverageOverBed "~{prefix}.bw" "~{reference_tiled_bed}" 001.tab.out
+      awk 'BEGIN{OFS="\t"} {split($1,a,"-"); print a[1], a[2], a[3], $5}' 001.tab.out | sort -k1,1 -k2,2n > "~{prefix}.binned.bed"
     fi
 
     echo "Done."
