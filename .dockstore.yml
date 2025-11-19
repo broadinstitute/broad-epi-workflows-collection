@@ -135,3 +135,12 @@ workflows:
              - sw-branch
          tags:
              - /.*/
+
+   - name: "macs3_workflow"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/mapping-bridge-macs3/subwf-macs3.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - sw-branch
+         tags:
+             - /.*/        
