@@ -20,20 +20,25 @@ task task_macs3 {
   command <<<
     set -euo pipefail
 
-    if ~{tn5_shift} ; then
-      echo "Applying Tn5 shift to BED files"
-      for bed in ~{sep=' ' bed_files}; do
-        awk 'BEGIN{OFS="\t"} {$2 = $2 - 4; $3 = $3 + 4} {print $0}' "$bed" > "${bed%.bed}_tn5.bed"
-      done
-      bed_files=()
-      for bed in ~{sep=' ' bed_files}; do
-        bed_files = bed_files + ["${bed%.bed}_tn5.bed"]
-      done
-    fi
+  shifted_beds=()
+
+  for bed in ~{sep=' ' bed_files}; do
+      out="tn5_$(basename "$bed")"
+
+      # auto-detect gzip
+      if [[ "$bed" == *.gz ]]; then
+          zcat "$bed" | \
+            awk 'BEGIN{OFS="\t"}{$2=$2-4;$3=$3+4;print}' > "$out"
+      else
+          awk 'BEGIN{OFS="\t"}{$2=$2-4;$3=$3+4;print}' "$bed" > "$out"
+      fi
+
+      shifted_beds+=("$out")
+  done
 
     macs3 callpeak \
       -f FRAG \
-      -t ~{sep=' ' bed_files} \
+      -t "${shifted_beds[@]}" \
       -g ~{genome_size} \
       -q ~{qvalue} \
       --cutoff-analysis \
