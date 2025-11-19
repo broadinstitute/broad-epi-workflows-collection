@@ -14,7 +14,6 @@ workflow wf_macs3{
         File accession
         File igvf_credentials
         String prefix
-        File? barcode_map
     }
     
     if (sub(accession, "^gs:\/\/", "") == sub(accession, "", "")){
@@ -27,40 +26,18 @@ workflow wf_macs3{
     
     File fragment = select_first([ check_inputs.output_file, accession ])
 
-    if (defined(barcode_map)) {
-            call task_macs3.split_celltypes as split_celltypes {
-                input:
-                    barcode_map = select_first([barcode_map])
-            }
-
-            scatter (ct in split_celltypes.celltypes) {
-                call task_macs3.task_macs3 as macs3_ct {
-                    input:
-                        bed_files    = [fragment],
-                        name_prefix  = prefix + "_" + ct,
-                        genome_size  = 2654621783.0,
-                        qvalue       = 0.01,
-                        barcode_file = split_celltypes.barcode_lists[ct]
-                }
-            }
+    call task_macs3.task_macs3 as task_macs3 {
+            input:
+                bed_files = [fragment],
+                name_prefix = prefix,
+                genome_size = 2654621783.0, 
+                qvalue = 0.01
         }
-
-        if (!defined(barcode_map)) {
-            call task_macs3.task_macs3 as macs3_single {
-                input:
-                    bed_files   = [fragment],
-                    name_prefix = prefix,
-                    genome_size = 2654621783.0,
-                    qvalue      = 0.01
-            }
-        }
-
+    
     output {
-        #Array[String]  celltypes         = select_first([split_celltypes.celltypes, ["None"]])
-        Array[File]  narrow_peaks    = select_first([macs3_ct.narrow_peaks, macs3_single.narrow_peaks])
-        Array[File]  summit_bed      = select_first([macs3_ct.summit_bed, macs3_single.summit_bed])
-        Array[File]  cutoff_analysis = select_first([macs3_ct.cutoff_analysis, macs3_single.cutoff_analysis])
-        Array[Float]  peak_count     = select_first([macs3_ct.peak_count, macs3_single.peak_count])
+         File narrow_peaks    = task_macs3.narrow_peaks
+         File cutoff_analysis = task_macs3.cutoff_analysis
+         File summit_bed      = task_macs3.summit_bed
+         Float peak_count     = task_macs3.peak_count
     }
-
 }
