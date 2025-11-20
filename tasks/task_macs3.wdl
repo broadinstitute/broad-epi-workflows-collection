@@ -15,6 +15,7 @@ task task_macs3 {
     Float qvalue
     File? barcode_file  
     Boolean tn5_shift = true
+    Boolean cutoff_analysis_flag = true
   }
 
   command <<<
@@ -41,7 +42,7 @@ task task_macs3 {
       -t "${shifted_beds[@]}" \
       -g ~{genome_size} \
       -q ~{qvalue} \
-      --cutoff-analysis \
+      ~{if cutoff_analysis_flag then "--cutoff-analysis" else ""} \
       ~{if defined(barcode_file) then "--barcodes " + barcode_file else ""} \
       -n ~{name_prefix}
 
