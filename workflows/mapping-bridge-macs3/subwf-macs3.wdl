@@ -11,24 +11,28 @@ workflow wf_macs3{
     }
     
     input {
-        File accession
+        Array[File] accessions
         File igvf_credentials
         String prefix
     }
     
-    if (sub(accession, "^gs:\/\/", "") == sub(accession, "", "")){
-        call task_check_inputs.check_inputs as check_inputs {
+    scatter (acc in accessions) {
+        Boolean is_local = sub(acc, "^gs://", "") == sub(acc, "", "")
+        if (is_local) {
+            call task_check_inputs.check_inputs as check_inputs {
                 input:
-                    path = accession,
+                    path = acc,
                     igvf_credentials = igvf_credentials
             }
+        }
+        File resolved_fragment = select_first([check_inputs.output_file, acc])
     }
     
-    File fragment = select_first([ check_inputs.output_file, accession ])
+    Array[File] fragments = resolved_fragment
 
     call task_macs3.task_macs3 as task_macs3 {
             input:
-                bed_files = [fragment],
+                bed_files = fragments,
                 name_prefix = prefix,
                 genome_size = 2654621783.0, 
                 qvalue = 0.01
