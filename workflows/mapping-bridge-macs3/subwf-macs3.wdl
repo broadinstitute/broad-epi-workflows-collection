@@ -40,7 +40,7 @@ workflow wf_macs3{
     
     output {
          File narrow_peaks    = task_macs3.narrow_peaks
-         File cutoff_analysis = task_macs3.cutoff_analysis
+         File? cutoff_analysis = task_macs3.cutoff_analysis
          File summit_bed      = task_macs3.summit_bed
          Float peak_count     = task_macs3.peak_count
     }

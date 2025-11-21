@@ -56,7 +56,7 @@ task task_macs3 {
   output {
     File narrow_peaks = "macs_output/~{name_prefix}_peaks.narrowPeak"
     File summit_bed = "macs_output/~{name_prefix}_summits.bed"
-    File cutoff_analysis = "macs_output/~{name_prefix}_cutoff_analysis.txt"
+    File? cutoff_analysis = "macs_output/~{name_prefix}_cutoff_analysis.txt"
     Float peak_count = read_float("macs_output/peak_count.txt")
   }
 
