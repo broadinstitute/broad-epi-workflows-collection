@@ -3,7 +3,7 @@ version 1.0
 import "../../tasks/task_get_tcga_bam_slice.wdl" as task_get_bam_slice
 import "../../tasks/task_featurecount.wdl" as task_featurecount
 
-workflow wf_featurecount{
+workflow wf_proviruses_quantification{
     meta {
         version: 'v0.1'
         author: 'Eugenio Mattei'
@@ -11,14 +11,15 @@ workflow wf_featurecount{
     }
     
     input {
-        File tcga_bam_uuid
+        String gdc_bam_uuid
+        File gdc_token_file
         File annotation_saf_file
         String? prefix = "prefix"
     }
 
     call task_get_bam_slice as bam_slice {
         input:
-            gdc_uuid = tcga_bam_uuid
+            gdc_bam_uuid = gdc_bam_uuid
     }
 
     
