@@ -18,15 +18,14 @@ task proviruses_quantification {
         File gdc_token_file
         String prefix
 
+        Int cpus=2
+        Int mem_gb=4
+        Int disk_gb=50
+
         # Runtime parameters
         String docker_image="polumechanos/gdc-client:latest"
 
     }
-
-    Int mem_gb = 4
-    Int cpus = 2
-    Int disk_gb = 80
-
 
     command {
         set -e
