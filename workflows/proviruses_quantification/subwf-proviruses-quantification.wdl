@@ -17,32 +17,23 @@ workflow wf_proviruses_quantification{
         String? prefix = "prefix"
     }
 
-    call task_get_bam_slice as bam_slice {
+    call task_get_bam_slice.proviruses_quantification as bam_slice {
         input:
-            gdc_bam_uuid = gdc_bam_uuid
+            gdc_bam_uuid = gdc_bam_uuid,
+            gdc_token_file = gdc_token_file
     }
 
     
     call task_featurecount.feature_counts_rna as count {
         input:
-            bam = tcga_bam_uuid,
-            binned_bed = binned_bed,
-            A_compartments_bed = A_compartments_bed,
-            B_compartments_bed = B_compartments_bed,
-            prefix = prefix
+            bam = bam_slice.sliced_bam,
+            gtf = annotation_saf_file,
+            prefix = annotation_saf_file
     }
     
     output {
-        File pbs_corrected_bed = pbs.pbs_corrected_bed
-        File pbs_corrected_plot = pbs.pbs_corrected_plot
-        File pbs_original_plot = pbs.pbs_original_plot
-        File pbs_compartment_fit_plot = pbs.pbs_compartment_fit_plot
-        File pbs_joint_plot = pbs.pbs_joint_plot
-    }
-
-    output {
-        File rna_featurecount_count = count.rna_featurecount_counts
-        File rna_featurecount_summary = count.rna_featurecount_summary
+        File proviruses_featurecount_summary = count.rna_featurecount_summary
+        File proviruses_featurecount_counts = count.rna_featurecount_counts
     }
 }
 

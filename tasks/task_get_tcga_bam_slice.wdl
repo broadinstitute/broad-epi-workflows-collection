@@ -1,6 +1,6 @@
 version 1.0
 
-task feature_counts_rna {
+task proviruses_quantification {
     meta {
         version: 'v0.1'
         author: 'Eugenio Mattei'
@@ -14,19 +14,18 @@ task feature_counts_rna {
         # Fridman et al (2026).
 
         # Inputs
-        String bam_gdc_uuid
+        String gdc_bam_uuid
         File gdc_token_file
         String prefix
 
         # Runtime parameters
-        String docker="polumechanos/gdc-client:latest"
+        String docker_image="polumechanos/gdc-client:latest"
 
     }
 
-    #Float input_file_size_gb = size(input[0], "G")
-    Int mem_gb = 64
-    
-    #Int disk_gb = round(20.0 + 4 * input_file_size_gb)
+    Int mem_gb = 4
+    Int cpus = 2
+    Int disk_gb = 80
 
 
     command {
@@ -36,7 +35,7 @@ task feature_counts_rna {
 
         token=$(<gdc-token-text-file.txt)
         
-        curl --header "X-Auth-Token: $token" 'https://api.gdc.cancer.gov/slicing/view/2912e314-f6a7-4f4a-94ac-20db2c8f793b?region=chr1&region=chr2:10000&region=chr3:10000-20000' --output ${prefix}_regions_slice.bam
+        curl --header "X-Auth-Token: $token" 'https://api.gdc.cancer.gov/slicing/view/${gdc_bam_uuid}?region=chr1&region=chr2:10000&region=chr3:10000-20000' --output ${prefix}_regions_slice.bam
 
     }
 
@@ -54,7 +53,7 @@ task feature_counts_rna {
     }
 
     parameter_meta {
-        bam_gdc_uuid: {
+        gdc_bam_uuid: {
                 description: 'BAM UUID',
                 help: 'UUID of the aligned reads from GDC.',
                 example: 'adsads-dadsa-dsa'
