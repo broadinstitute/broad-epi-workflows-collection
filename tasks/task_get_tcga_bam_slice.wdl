@@ -16,6 +16,7 @@ task proviruses_quantification {
         # Inputs
         String gdc_bam_uuid
         File gdc_token_file
+        File gdc_payload
         String prefix
 
         Int cpus=2
@@ -31,10 +32,19 @@ task proviruses_quantification {
         set -e
 
         ln -s ${gdc_token_file} gdc-token-text-file.txt
+        ln -s ${gdc_payload} payload.json
 
         token=$(<gdc-token-text-file.txt)
         
-        curl --header "X-Auth-Token: $token" 'https://api.gdc.cancer.gov/slicing/view/${gdc_bam_uuid}?region=chr1&region=chr2:10000&region=chr3:10000-20000' --output ${prefix}_regions_slice.bam
+        #curl --header "X-Auth-Token: $token" 'https://api.gdc.cancer.gov/slicing/view/${gdc_bam_uuid}?region=chr1&region=chr2:10000&region=chr3:10000-20000' --output ${prefix}_regions_slice.bam
+
+        curl -fS --retry 3 \
+        --header "X-Auth-Token: $token" \
+        --header "Content-Type: application/json" \
+        --request POST \
+        --data @payload.json \
+        "https://api.gdc.cancer.gov/slicing/view/${gdc_bam_uuid}" \
+        --output ${prefix}_regions_slice.bam
 
     }
 
