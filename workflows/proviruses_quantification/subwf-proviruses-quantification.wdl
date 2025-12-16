@@ -14,13 +14,14 @@ workflow wf_proviruses_quantification{
         String gdc_bam_uuid
         File gdc_token_file
         File annotation_saf_file
-        String? prefix = "prefix"
+        String prefix = "prefix"
     }
 
     call task_get_bam_slice.proviruses_quantification as bam_slice {
         input:
             gdc_bam_uuid = gdc_bam_uuid,
-            gdc_token_file = gdc_token_file
+            gdc_token_file = gdc_token_file,
+            prefix = prefix
     }
 
     
@@ -28,7 +29,7 @@ workflow wf_proviruses_quantification{
         input:
             bam = bam_slice.sliced_bam,
             gtf = annotation_saf_file,
-            prefix = annotation_saf_file
+            prefix = prefix
     }
     
     output {
