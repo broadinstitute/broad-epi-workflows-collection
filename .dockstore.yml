@@ -81,6 +81,15 @@ workflows:
              - main
          tags:
              - /.*/
+    
+   - name: "Proviruses Quantification"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/proviruses_quantification/subwf-proviruses-quantification.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - main
+         tags:
+             - /.*/
              
    - name: "PicardMergeBams"
      subclass: WDL
