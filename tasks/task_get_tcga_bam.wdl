@@ -33,7 +33,7 @@ task proviruses_quantification {
 
         token=$(<gdc-token-text-file.txt)
         
-        curl --remote-name --remote-header-name --header "X-Auth-Token: $token" 'https://api.gdc.cancer.gov/data/${gdc_bam_uuid}' --output ${prefix}.bam
+        curl --header "X-Auth-Token: $token" 'https://api.gdc.cancer.gov/data/${gdc_bam_uuid}' --output ${prefix}.bam
     }
 
     output {
