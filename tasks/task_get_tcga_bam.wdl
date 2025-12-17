@@ -4,19 +4,17 @@ task proviruses_quantification {
     meta {
         version: 'v0.1'
         author: 'Eugenio Mattei'
-        description: 'Broad Institute of MIT and Harvard: assign features rna task'
+        description: 'Broad Institute of MIT and Harvard: download bam'
     }
 
     input {
         # This function takes in input a gdc uuid accession and
-        # using the gdc-client tool, downloads all the reads overlapping
-        # provisuses annotations. The definition of the proviruses comes from 
+        # using the gdc-client tool, downloads the bams.
         # Fridman et al (2026).
 
         # Inputs
         String gdc_bam_uuid
         File gdc_token_file
-        String region
         String prefix
 
         Int cpus=2
@@ -35,11 +33,11 @@ task proviruses_quantification {
 
         token=$(<gdc-token-text-file.txt)
         
-        curl --header "X-Auth-Token: $token" 'https://api.gdc.cancer.gov/slicing/view/${gdc_bam_uuid}?region=${region}' --output ${prefix}_regions_slice.bam
+        curl --remote-name --remote-header-name --header "X-Auth-Token: $token" 'https://api.gdc.cancer.gov/data/${gdc_bam_uuid}' --output ${prefix}.bam
     }
 
     output {
-        File sliced_bam = "${prefix}_regions_slice.bam"
+        File gdc_tcga_bam = "${prefix}.bam"
     }
 
     runtime {
