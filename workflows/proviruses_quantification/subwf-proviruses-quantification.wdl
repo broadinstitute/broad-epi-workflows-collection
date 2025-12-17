@@ -14,27 +14,33 @@ workflow wf_proviruses_quantification{
         String gdc_bam_uuid
         File gdc_token_file
         File annotation_saf_file
+        File proviruses_coordinates
         String prefix = "prefix"
     }
 
-    call task_get_bam_slice.proviruses_quantification as bam_slice {
-        input:
-            gdc_bam_uuid = gdc_bam_uuid,
-            gdc_token_file = gdc_token_file,
-            prefix = prefix
-    }
+    Array[String] regions = read_lines(proviruses_coordinates)
 
-    
-    call task_featurecount.feature_counts_rna as count {
-        input:
-            bam = bam_slice.sliced_bam,
-            gtf = annotation_saf_file,
-            prefix = prefix
+    scatter(region in regions){
+        call task_get_bam_slice.proviruses_quantification as bam_slice {
+            input:
+                gdc_bam_uuid = gdc_bam_uuid,
+                gdc_token_file = gdc_token_file,
+                region = region,
+                prefix = prefix
+        }
+
+        call task_featurecount.feature_counts_rna as count {
+            input:
+                bam = bam_slice.sliced_bam,
+                gtf = annotation_saf_file,
+                prefix = prefix
+        }
     }
+    
     
     output {
-        File proviruses_featurecount_summary = count.rna_featurecount_summary
-        File proviruses_featurecount_counts = count.rna_featurecount_counts
+        Array[File] proviruses_featurecount_summary = count.rna_featurecount_summary
+        Array[File] proviruses_featurecount_counts = count.rna_featurecount_counts
     }
 }
 
