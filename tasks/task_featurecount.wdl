@@ -48,7 +48,7 @@ task feature_counts_rna {
 
         # Count reads in exons
         featureCounts -T ${cpus} \
-            -Q ${quality}
+            -Q ${quality} \
             ${if multimapper then "-M " else ""} \
             ${"-a " + gtf} \
             ${"-t " + feature_type} \
