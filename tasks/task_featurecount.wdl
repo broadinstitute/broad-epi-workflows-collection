@@ -21,6 +21,7 @@ task feature_counts_rna {
         Boolean counts_fragments
         File bam
         File gtf
+        Int quality
         String feature_type = "exon"
         String format # SAF/GTF
         String gene_naming = "gene_name"
@@ -46,10 +47,9 @@ task feature_counts_rna {
         ln -s ${bam} temp_input.bam
 
         # Count reads in exons
-        # If multimappers are selected use '-Q 0 -M' options.
-        # For unique mappers use '-Q 30'
         featureCounts -T ${cpus} \
-            -Q ${if multimapper then "0 -M " else "30"} \
+            -Q ${quality}
+            ${if multimapper then "-M " else ""} \
             ${"-a " + gtf} \
             ${"-t " + feature_type} \
             ${"-g " + gene_naming} \
