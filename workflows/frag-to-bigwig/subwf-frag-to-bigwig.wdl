@@ -3,7 +3,7 @@ version 1.0
 import "../../tasks/task_check_inputs.wdl" as task_check_inputs
 import "../../tasks/task_frag_to_bigwig.wdl" as task_frag_to_bigwig
 
-workflow wf_macs3{
+workflow wf_frag_to_bigwig {
     meta {
         version: 'v0.1'
             author: 'Siddarth Wekhande (swekhand@broadinstitute.org) @ Broad Institute of MIT and Harvard'
