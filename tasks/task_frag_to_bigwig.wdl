@@ -20,6 +20,7 @@ task task_frag_to_bigwig {
     Boolean cut_sites = false
     Boolean chrom_prefix = false
     String sort_memory = "4G"
+    Int cpu = 8
   }
 
   command <<<
@@ -91,7 +92,7 @@ task task_frag_to_bigwig {
 
   runtime {
     docker: "swekhande/shareseq-prod:scatac-fragment-tools-v2"
-    cpu: 8
+    cpu: ~{cpu}
     memory: "32G"
     disks: "local-disk 500 SSD"
   }
