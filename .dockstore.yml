@@ -143,4 +143,13 @@ workflows:
          branches:
              - sw-branch
          tags:
-             - /.*/        
+             - /.*/       
+
+   - name: "fragment_to_bigwig_workflow"
+     subclass: WDL
+     primaryDescriptorPath: /workflows/frag-to-bigwig/subwf-frag-to-bigwig.wdl
+     filters:  # Only develop or master branches and localAligner/** tags
+         branches:
+             - sw-branch
+         tags:
+             - /.*/  
