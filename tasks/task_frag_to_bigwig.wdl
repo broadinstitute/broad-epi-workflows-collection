@@ -15,10 +15,10 @@ task task_frag_to_bigwig {
     File? barcode_file  
     Boolean tn5_shift = true
 
-    Boolean? normalize
-    Float? scaling
-    Boolean? cut_sites
-    Boolean? chrom_prefix
+    Boolean? normalize = false
+    Float? scaling = 1.0
+    Boolean? cut_sites = false
+    Boolean? chrom_prefix = false
   }
 
   command <<<

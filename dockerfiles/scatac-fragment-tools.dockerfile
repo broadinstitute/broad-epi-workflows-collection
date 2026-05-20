@@ -1,9 +1,24 @@
-FROM python:3.11-slim
+FROM rust:1-bookworm
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      gzip \
-      ca-certificates && \
+        python3 \
+        python3-venv \
+        python3-dev \
+        clang \
+        libclang-dev \
+        llvm-dev \
+        pkg-config \
+        zlib1g-dev \
+        gzip \
+        ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir "scatac-fragment-tools[pybigtools]==0.1.5"
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+ENV LIBCLANG_PATH=/usr/lib/llvm-14/lib
+ENV LD_LIBRARY_PATH=/usr/lib/llvm-14/lib
+
+RUN pip install --upgrade pip setuptools wheel maturin && \
+    pip install "scatac-fragment-tools[pybigtools]==0.1.5"
