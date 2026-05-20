@@ -36,7 +36,6 @@ task task_frag_to_bigwig {
   log "Output merged fragments: ${merged_fragments}"
   log "Output bigWig: ${out_bw}"
   log "Tn5 shift enabled: ~{tn5_shift}"
-  log "CPU: ~{cpu}"
 
   mkdir -p sort_tmp
 
@@ -92,7 +91,7 @@ task task_frag_to_bigwig {
 
   runtime {
     docker: "swekhande/shareseq-prod:scatac-fragment-tools-v2"
-    cpu: 4
+    cpu: 8
     memory: "32G"
     disks: "local-disk 500 SSD"
   }
