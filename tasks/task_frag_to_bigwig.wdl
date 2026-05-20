@@ -19,62 +19,70 @@ task task_frag_to_bigwig {
     Float scaling = 1.0
     Boolean cut_sites = false
     Boolean chrom_prefix = false
+    String sort_memory = "4G"
   }
 
   command <<<
-        set -euo pipefail
+  set -euo pipefail
 
-        merged_fragments="~{output_prefix}.merged.fragments.tsv.gz"
-        out_bw="~{output_prefix}.bw"
+  log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2
+  }
 
-        processed_beds=()
+  merged_fragments="~{output_prefix}.merged.fragments.tsv.gz"
+  out_bw="~{output_prefix}.bw"
 
-        for bed in ~{sep=' ' fragments}; do
-            base="$(basename "$bed")"
-            base="${base%.gz}"
+  log "Starting fragment processing"
+  log "Output merged fragments: ${merged_fragments}"
+  log "Output bigWig: ${out_bw}"
+  log "Tn5 shift enabled: ~{tn5_shift}"
+  log "CPU: ~{cpu}"
 
-            if ~{tn5_shift}; then
-                out="tn5_shifted_${base}"
+  mkdir -p sort_tmp
 
-                if [[ "$bed" == *.gz ]]; then
-                    gzip -dc "$bed" | \
-                    awk 'BEGIN{OFS="\t"}{
-                        $2=$2-4;
-                        if ($2 < 0) $2=0;
-                        $3=$3+4;
-                        print
-                    }' > "$out"
-                else
-                    awk 'BEGIN{OFS="\t"}{
-                    $2=$2-4;
-                    if ($2 < 0) $2=0;
-                    $3=$3+4;
-                    print
-                    }' "$bed" > "$out"
-                fi
-            else
-                out="unshifted_${base}"
+  log "Streaming gzipped fragments, applying optional Tn5 shift, sorting, and compressing"
 
-                if [[ "$bed" == *.gz ]]; then
-                    gzip -dc "$bed" > "$out"
-                else
-                    cat "$bed" > "$out"
-                fi
-            fi
+  {
+    for bed in ~{sep=' ' fragments}; do
+      log "Processing input: ${bed}"
 
-            processed_beds+=("$out")
-        done
+      if ~{tn5_shift}; then
+        gzip -dc "${bed}" | awk 'BEGIN{OFS="\t"}{
+          $2=$2-4;
+          if ($2 < 0) $2=0;
+          $3=$3+4;
+          print
+        }'
+      else
+        gzip -dc "${bed}"
+      fi
+    done
+  } | sort \
+        -T sort_tmp \
+        -S ~{sort_memory} \
+        --parallel ~{cpu} \
+        -k1,1 -k2,2n | \
+      gzip -c > "${merged_fragments}"
 
-        cat "${processed_beds[@]}" | sort -k1,1 -k2,2n | gzip -c > "$merged_fragments"
+  log "Finished merge/sort/compression"
+  log "Merged fragments size:"
+  ls -lh "${merged_fragments}" >&2
 
-        scatac_fragment_tools bigwig \
-        -i "$merged_fragments" \
-        -c "~{chrom_sizes}" \
-        -o "$out_bw" \
-        ~{if normalize then "-n" else ""} \
-        -s ~{scaling} \
-        ~{if cut_sites then "-x" else ""} \
-        ~{if chrom_prefix then "--chrom-prefix" else ""}
+  log "Running scatac_fragment_tools bigwig"
+
+  scatac_fragment_tools bigwig \
+    -i "${merged_fragments}" \
+    -c "~{chrom_sizes}" \
+    -o "${out_bw}" \
+    ~{if normalize then "-n" else ""} \
+    -s ~{scaling} \
+    ~{if cut_sites then "-x" else ""} \
+    ~{if chrom_prefix then "--chrom-prefix" else ""}
+
+  log "Finished bigWig generation"
+  log "bigWig size:"
+  ls -lh "${out_bw}" >&2
+
 >>>
 
   output {
@@ -86,6 +94,6 @@ task task_frag_to_bigwig {
     docker: "swekhande/shareseq-prod:scatac-fragment-tools-v2"
     cpu: 4
     memory: "32G"
-    disks: "local-disk 100 SSD"
+    disks: "local-disk 500 SSD"
   }
 }
