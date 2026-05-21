@@ -93,7 +93,7 @@ task task_frag_to_bigwig {
   runtime {
     docker: "swekhande/shareseq-prod:scatac-fragment-tools-v2"
     cpu: 8
-    memory: "32G"
+    memory: "128G"
     disks: "local-disk 500 SSD"
   }
 }
